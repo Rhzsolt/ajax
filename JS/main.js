@@ -1,22 +1,32 @@
-document.getElementById('fetch-posts').onclick = function(){
-var xhr = new XMLHttpRequest;
+document.getElementById('fetch-posts').onclick = function () {
 
-xhr.onreadystatechange = function(){
+    var url = 'http://jsonplaceholder.typicode.com/posts';
 
-    if(xhr.readyState === 4 && xhr.status === 200){
-        var posts = JSON.parse(xhr.responseText);
+    sendRequest(url, 'GET', null, function (posts) {
 
-        var postListHTML = '' ;
-        for(var post of posts){
-            postListHTML += post.body + post.title
+        var listHTML = ''
+
+        for (var post of posts) {
+            listHTML += '<p>' + post.title + '</p>' + post.body
         }
-
-        document.getElementById('post-list-container').innerHTML = postListHTML;
-
-    }
+        document.getElementById('post-list-container').innerHTML = listHTML;
+    })
 }
-xhr.open('GET','http://jsonplaceholder.typicode.com/posts')
 
-xhr.send()
 
+
+
+
+
+
+
+function sendRequest(url, method, body, callback) {
+    var xhr = new XMLHttpRequest;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState = 4 && xhr.status === 200) {
+            callback(JSON.parse(xhr.responseText))
+        }
+    }
+    xhr.open(method, url)
+    xhr.send(body)
 }
