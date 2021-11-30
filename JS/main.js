@@ -1,34 +1,56 @@
-document.getElementById('login').onclick = function () {
-    var url = 'https://reqres.in/api/login';
+var state = [];
+
+
+document.getElementById('login').onsubmit = function (event) {
+    event.preventDefault();
+    var email = event.target.elements.email.value;
+    var password = event.target.elements.password.value
     var body = JSON.stringify({
-        email: 'eve.holt@reqres.in',
-        password: 'cityslicka'
+        email: email,
+        password: password
     })
 
-    sendRequest(url, 'POST', body, function (token) {
-        console.log(token);
-        sendRequest('https://reqres.in/api/user/2', 'GET', null, function (users) {
-            console.log(users)
+    fetch('https://reqres.in/api/login', {
+        method: 'POST',
+        body: body,
+        headers: { 'content-type': 'application/json' }
+    })
+        .then(function (vadToken) {
+            console.log()
+            if (!vadToken.ok) {
+                return Promise.reject('Login hiba')
+            }
+            return vadToken.json()
         })
-    })
-};
+        .then(function (joToken) {
+            console.log()
+            return fetch('https://reqres.in/api/users')
+        })
+        .then(function (vadUser) {
+            console.log()
+            if (!vadUser.ok) {
+                return Promise.reject('User error')
+            }
+
+            return vadUser.json()
+        })
+
+        .then(function (joUser) {
+            state = joUser.data;
+            renderUser()
+        })
+
+        .catch(function (x) {
+            console.log(x)
+        })
 
 
+}
 
-
-
-
-function sendRequest(url, method, body, callback) {
-
-    var xhr = new XMLHttpRequest;
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            callback(JSON.parse(xhr.responseText))
-        }
+function renderUser() {
+    var userHTML = '';
+    for (var user of state) {
+        userHTML += `<li class="list-group-item">${user.first_name} ${user.last_name}</li>`
     }
-
-    xhr.open(method, url)
-    xhr.setRequestHeader('content-type', 'application/json')
-    xhr.send(body)
+    document.getElementById("user-list-container").innerHTML ='<ul class="list-group">' + userHTML + '</ul>'; 
 }
